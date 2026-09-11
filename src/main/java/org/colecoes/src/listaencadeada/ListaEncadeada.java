@@ -25,27 +25,42 @@ public class ListaEncadeada<T> implements IColecao<T>, Iterable<T> {
     public boolean adicionar(T novoValor) {
         if (novoValor == null) return false;
 
+        if (ehOrdenada) {
+            return adicionarOrdenado(novoValor);
+        }
+        return adicionarNaoOrdenada(novoValor);
+    }
+
+    private boolean adicionarOrdenado(T novoValor) {
         No<T> novoNo = new No<>(novoValor);
         if (prim == null) {
             prim = novoNo;
             return true;
         }
 
-        if (ehOrdenada) {
-            if (comparador.compare(novoValor, prim.getValor()) < 0) {
-                novoNo.setProx(prim);
-                prim = novoNo;
-                return true;
-            }
-            No<T> atual = prim;
-            while (atual.getProx() != null
-                    && comparador.compare(novoValor, atual.getProx().getValor()) >= 0) {
-                atual = atual.getProx();
-            }
-            novoNo.setProx(atual.getProx());
-            atual.setProx(novoNo);
+        if (comparador.compare(novoValor, prim.getValor()) < 0) {
+            novoNo.setProx(prim);
+            prim = novoNo;
             return true;
         }
+
+        No<T> atual = prim;
+        while (atual.getProx() != null
+                && comparador.compare(novoValor, atual.getProx().getValor()) >= 0) {
+            atual = atual.getProx();
+        }
+        novoNo.setProx(atual.getProx());
+        atual.setProx(novoNo);
+        return true;
+    }
+
+    private boolean adicionarNaoOrdenada(T novoValor) {
+        No<T> novoNo = new No<>(novoValor);
+        if (prim == null) {
+            prim = novoNo;
+            return true;
+        }
+
         No<T> ultimo = prim;
         while (ultimo.getProx() != null) ultimo = ultimo.getProx();
         ultimo.setProx(novoNo);
