@@ -124,6 +124,7 @@ public class ListaEncadeada<T> implements IColecao<T>, Iterable<T> {
         return resultado.append(']').toString();
     }
 
+    // Override do método iterator() para permitir a iteração sobre a lista encadeada
     @Override
     public Iterator<T> iterator() {
         return new Iterator<>() {
