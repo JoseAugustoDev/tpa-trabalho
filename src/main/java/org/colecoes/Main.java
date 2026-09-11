@@ -31,7 +31,7 @@ public class Main {
             exibirMenu();
             opcao = scanner.nextLine().trim();
             switch (opcao) {
-                case "1" -> carregarDadosIniciais(lista);
+                case "1" -> lista = carregarDadosIniciais(lista, ordenada);
                 case "2" -> adicionarContato(lista);
                 case "3" -> pesquisarContatoPorNome(lista);
                 case "4" -> pesquisarContatoPorTelefone(lista);
@@ -46,7 +46,8 @@ public class Main {
         } while (!opcao.equals("0"));
     }
 
-    private static void carregarDadosIniciais(IColecao<Contato> lista) {
+    private static IColecao<Contato> carregarDadosIniciais(
+            IColecao<Contato> listaAtual, boolean ordenada) {
         System.out.println("Escolha um arquivo para carregar os dados iniciais:");
         System.out.println("1 - contatos-100000.txt");
         System.out.println("2 - contatos-200000.txt");
@@ -64,15 +65,14 @@ public class Main {
 
         if (nomeArquivo == null) {
             System.out.println("Opção inválida.");
-            return;
+            return listaAtual;
         }
 
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
+        IColecao<Contato> novaLista = new ListaEncadeada<>(
+                new ContatoPorTelefone(), ordenada);
         Set<String> telefonesCadastrados = new HashSet<>();
-        for (Contato contato : contatosDaLista(lista)) {
-            telefonesCadastrados.add(contato.getTelefone());
-        }
 
         // Implementado com IA
         try (BufferedReader leitor = Files.newBufferedReader(
@@ -105,7 +105,7 @@ public class Main {
                             "Telefone duplicado na linha " + numeroLinha + ": " + telefone + ".");
                 }
 
-                lista.adicionar(new Contato(nome, telefone));
+                novaLista.adicionar(new Contato(nome, telefone));
                 quantidadeLida++;
             }
 
@@ -119,6 +119,7 @@ public class Main {
             System.out.println(quantidadeLida + " contatos carregados com sucesso.");
             System.out.printf("Tempo de leitura e montagem da lista: %d ns (%.3f ms)%n",
                     tempo, tempo / 1_000_000.0);
+            return novaLista;
         } catch (NoSuchFileException e) {
             System.out.println("Arquivo não encontrado: " + nomeArquivo);
         } catch (NumberFormatException e) {
@@ -126,6 +127,7 @@ public class Main {
         } catch (IOException e) {
             System.out.println("Erro ao carregar o arquivo: " + e.getMessage());
         }
+        return listaAtual;
     }
 
     private static void adicionarContato(IColecao<Contato> lista) {

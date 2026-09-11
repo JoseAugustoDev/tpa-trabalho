@@ -1,8 +1,8 @@
 package org.colecoes.dominio;
 
 public class Contato {
-    private final String nome;
-    private final String telefone;
+    private String nome;
+    private String telefone;
 
     public Contato(String nome, String telefone) {
         this.nome = nome;
@@ -13,9 +13,9 @@ public class Contato {
 
     public String getTelefone() { return telefone; }
 
-    public String setNome(String nome) { return nome; }
+    public void setNome(String nome) { this.nome = nome; }
     
-    public String setTelefone(String telefone) { return telefone; }
+    public void setTelefone(String telefone) { this.telefone = telefone; }
 
     @Override
     public String toString() { return nome + "-" + telefone; }
