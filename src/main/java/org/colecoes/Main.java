@@ -39,6 +39,7 @@ public class Main {
                 case "6" -> listarContatos(lista);
                 case "7" -> alterarContato(lista);
                 case "0" -> {
+                    System.out.println("Quantidade atual de contatos: " + lista.quantidadeNos());
                 }
                 default -> System.out.println("Opção inválida. Tente novamente.");
             }
@@ -148,36 +149,53 @@ public class Main {
         System.out.println("Digite o nome do contato a ser pesquisado:");
         String nome = scanner.nextLine().trim();
 
+        long inicio = System.nanoTime();
         Contato contatoPesquisado = buscarContatoPorNome(lista, nome);
+        long tempo = System.nanoTime() - inicio;
+
         if (contatoPesquisado != null) {
             System.out.println("Contato encontrado: " + contatoPesquisado);
         } else {
             System.out.println("Contato não encontrado.");
         }
+        System.out.printf("Tempo da pesquisa por nome: %d ns (%.3f ms)%n",
+                tempo, tempo / 1_000_000.0);
     }
 
     private static void pesquisarContatoPorTelefone(IColecao<Contato> lista) {
         System.out.println("Digite o telefone do contato a ser pesquisado:");
         String telefone = scanner.nextLine().trim();
+        Contato chavePesquisa = new Contato("", telefone);
 
-        Contato contatoPesquisado = buscarContatoPorTelefone(lista, telefone);
+        long inicio = System.nanoTime();
+        Contato contatoPesquisado = lista.pesquisar(chavePesquisa);
+        long tempo = System.nanoTime() - inicio;
+
         if (contatoPesquisado != null) {
             System.out.println("Contato encontrado: " + contatoPesquisado);
         } else {
             System.out.println("Contato não encontrado.");
         }
+        System.out.printf("Tempo da pesquisa por telefone: %d ns (%.3f ms)%n",
+                tempo, tempo / 1_000_000.0);
     }
 
     private static void removerContato(IColecao<Contato> lista) {
         System.out.println("Digite o telefone do contato a ser removido:");
         String telefone = scanner.nextLine().trim();
+        Contato chaveRemocao = new Contato("", telefone);
 
-        boolean removido = lista.remover(new Contato("", telefone));
+        long inicio = System.nanoTime();
+        boolean removido = lista.remover(chaveRemocao);
+        long tempo = System.nanoTime() - inicio;
+
         if (removido) {
             System.out.println("Contato removido com sucesso.");
         } else {
             System.out.println("Contato não encontrado para remoção.");
         }
+        System.out.printf("Tempo da remoção por telefone: %d ns (%.3f ms)%n",
+                tempo, tempo / 1_000_000.0);
     }
 
     private static void listarContatos(IColecao<Contato> lista) {
@@ -188,22 +206,36 @@ public class Main {
     }
 
     private static void alterarContato(IColecao<Contato> lista) {
-        System.out.println("Digite o telefone do contato a ser alterado:");
-        String telefoneAlteracao = scanner.nextLine().trim();
-        Contato contatoAlteracao = buscarContatoPorTelefone(lista, telefoneAlteracao);
-        if (contatoAlteracao != null) {
-            System.out.println("Contato encontrado: " + contatoAlteracao);
-            System.out.println("Digite o novo nome do contato:");
+        System.out.println("Digite o nome do contato a ser alterado:");
+        String nome = scanner.nextLine().trim();
+        Contato contatoAlteracao = buscarContatoPorNome(lista, nome);
 
-            String novoNome = scanner.nextLine().trim();
-
-            lista.remover(contatoAlteracao);
-            lista.adicionar(new Contato(novoNome, contatoAlteracao.getTelefone()));
-
-            System.out.println("Contato atualizado: " + contatoAlteracao);
-        } else {
+        if (contatoAlteracao == null) {
             System.out.println("Contato não encontrado para alteração.");
+            return;
         }
+
+        System.out.println("Telefone atual: " + contatoAlteracao.getTelefone());
+        System.out.println("Digite o novo nome do contato:");
+        String novoNome = scanner.nextLine().trim();
+
+        System.out.println("Digite o novo telefone do contato:");
+        String novoTelefone = scanner.nextLine().trim();
+
+        if (!novoTelefone.equalsIgnoreCase(contatoAlteracao.getTelefone())
+                && buscarContatoPorTelefone(lista, novoTelefone) != null) {
+            System.out.println("Já existe um contato cadastrado com esse telefone.");
+            return;
+        }
+
+        Contato contatoAtualizado = new Contato(novoNome, novoTelefone);
+        if (!lista.remover(contatoAlteracao)) {
+            System.out.println("Não foi possível alterar o contato.");
+            return;
+        }
+        lista.adicionar(contatoAtualizado);
+
+        System.out.println("Contato atualizado: " + contatoAtualizado);
     }
 
     private static Contato buscarContatoPorTelefone(IColecao<Contato> lista, String telefone) {
