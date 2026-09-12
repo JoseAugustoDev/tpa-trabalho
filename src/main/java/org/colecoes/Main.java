@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.colecoes.dominio.Contato;
-import org.colecoes.dominio.comparator.ContatoPorTelefone;
+import org.colecoes.dominio.comparator.ContatoPorNome;
 import org.colecoes.src.colecao.IColecao;
 import org.colecoes.src.listaencadeada.ListaEncadeada;
 
@@ -24,7 +24,7 @@ public class Main {
 
         Boolean ordenada = "S".equalsIgnoreCase(scanner.nextLine().trim());
 
-        IColecao<Contato> lista = new ListaEncadeada<>(new ContatoPorTelefone(), ordenada);
+        IColecao<Contato> lista = new ListaEncadeada<>(new ContatoPorNome(), ordenada);
 
         String opcao;
         do {
@@ -71,7 +71,7 @@ public class Main {
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
         IColecao<Contato> novaLista = new ListaEncadeada<>(
-                new ContatoPorTelefone(), ordenada);
+                new ContatoPorNome(), ordenada);
         Set<String> telefonesCadastrados = new HashSet<>();
 
         // Implementado com IA
