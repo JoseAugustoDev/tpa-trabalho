@@ -9,10 +9,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import org.colecoes.dominio.Contato;
 
@@ -59,32 +57,31 @@ public final class LeitorArquivos {
     }
 
     private static void validarContatos(List<Contato> contatos) throws IOException {
-        Set<String> nomes = new HashSet<>();
         Set<String> telefones = new HashSet<>();
-        String nomeAnterior = null;
         for (Contato contato : contatos) {
-            String nome = contato.getNome().toLowerCase(Locale.ROOT);
-            if (!nomes.add(nome)) throw new IOException("Nome duplicado: " + contato.getNome());
             if (!telefones.add(contato.getTelefone())) {
                 throw new IOException("Telefone duplicado: " + contato.getTelefone());
             }
-            if (nomeAnterior != null && nomeAnterior.compareTo(nome) > 0) {
-                throw new IOException("O arquivo de contatos nao esta ordenado por nome.");
-            }
-            nomeAnterior = nome;
         }
     }
 
     public static void salvarContatos(Iterable<Contato> contatos) throws IOException {
-        List<Contato> ordenados = new ArrayList<>();
-        contatos.forEach(ordenados::add);
-        ordenados.sort(Comparator.comparing(Contato::getNome, String.CASE_INSENSITIVE_ORDER));
+        salvarContatos(ARQUIVO_CONTATOS, contatos);
+    }
 
-        Path temporario = ARQUIVO_CONTATOS.resolveSibling(ARQUIVO_CONTATOS.getFileName() + ".tmp");
+    public static void salvarContatos(Path arquivo, Iterable<Contato> contatos) throws IOException {
+        List<Contato> listaContatos = new ArrayList<>();
+        contatos.forEach(listaContatos::add);
+
+        Path arquivoAbsoluto = arquivo.toAbsolutePath();
+        Path diretorio = arquivoAbsoluto.getParent();
+        if (diretorio != null) Files.createDirectories(diretorio);
+
+        Path temporario = arquivoAbsoluto.resolveSibling(arquivoAbsoluto.getFileName() + ".tmp");
         try (BufferedWriter writer = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8)) {
-            writer.write(Integer.toString(ordenados.size()));
+            writer.write(Integer.toString(listaContatos.size()));
             writer.newLine();
-            for (Contato contato : ordenados) {
+            for (Contato contato : listaContatos) {
                 writer.write(contato.getNome());
                 writer.write(';');
                 writer.write(contato.getTelefone());
@@ -93,10 +90,10 @@ public final class LeitorArquivos {
         }
 
         try {
-            Files.move(temporario, ARQUIVO_CONTATOS, StandardCopyOption.REPLACE_EXISTING,
+            Files.move(temporario, arquivoAbsoluto, StandardCopyOption.REPLACE_EXISTING,
                     StandardCopyOption.ATOMIC_MOVE);
         } catch (AtomicMoveNotSupportedException e) {
-            Files.move(temporario, ARQUIVO_CONTATOS, StandardCopyOption.REPLACE_EXISTING);
+            Files.move(temporario, arquivoAbsoluto, StandardCopyOption.REPLACE_EXISTING);
         }
     }
 }
