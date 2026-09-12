@@ -9,44 +9,43 @@ import java.util.Random;
 
 import org.colecoes.dominio.Contato;
 
-public final class GeradorArquivosOrdenados {
-    private static final int[] QUANTIDADES = {100_000, 200_000, 300_000, 400_000};
-    private static final Path DIRETORIO_DADOS =
-            Path.of("src/main/java/org/colecoes/dominio/dados");
+public final class GeradorArquivos {
+    private static final int[] QUANTIDADES = { 100_000, 200_000, 300_000, 400_000 };
+    private static final Path DIRETORIO_DADOS = Path.of("src/main/java/org/colecoes/dominio/dados");
     private static final long SEMENTE = 2026L;
     private static final String[] PRENOMES = {
-            "Ana", "Bruno", "Carlos", "Daniela", "Eduardo", "Fernanda", "Gabriel", "Helena", "Isabela", "João",
-            "Juliana", "Lucas", "Mariana", "Nathan", "Olivia", "Paulo", "Quésia", "Rafael", "Sofia", "Thiago",
+            "Ana", "Bruno", "Carlos", "Daniela", "Eduardo", "Fernanda", "Gabriel", "Helena", "Isabela", "Joao",
+            "Juliana", "Lucas", "Mariana", "Nathan", "Olivia", "Paulo", "Quesia", "Rafael", "Sofia", "Thiago",
             "Victor", "William", "Xavier", "Yasmin", "Zuleica", "Alfredo", "Beatriz", "Caio", "Denise", "Eliana",
-            "Felipe", "Gustavo", "Heitor", "Igor", "Jéssica", "Kevin", "Larissa", "Mateus", "Natália", "Otávio",
-            "Patrícia", "Renato", "Sandra", "Tadeu", "Ursula", "Vinícius", "Wellington", "Zilda", "Adriana", "Benício",
-            "Cristina", "Davi", "Emanuel", "Flávia", "Geraldo", "Heloísa", "Ícaro", "Jaqueline", "Leonardo", "Marta",
+            "Felipe", "Gustavo", "Heitor", "Igor", "Jessica", "Kevin", "Larissa", "Mateus", "Natalia", "Otavio",
+            "Patricia", "Renato", "Sandra", "Tadeu", "Ursula", "Vinicius", "Wellington", "Zilda", "Adriana", "Benicio",
+            "Cristina", "Davi", "Emanuel", "Flavia", "Geraldo", "Heloisa", "Icaro", "Jaqueline", "Leonardo", "Marta",
             "Nelson", "Orlando", "Priscila", "Raquel", "Saulo", "Tatiane", "Ubirajara", "Vera", "Wesley", "Zenaide",
-            "Alice", "Brenda", "Caetano", "Danilo", "Enzo", "Fabiana", "Gilberto", "Henrique", "Isadora", "José",
-            "Kátia", "Lorena", "Maurício", "Natanael", "Osvaldo", "Pamela", "Regina", "Sandro", "Tânia", "Ulisses",
-            "Vânia", "Wilson", "Yago", "Zélia", "Amélia", "Bernardo", "Celso", "Dulce", "Edson", "Fátima", "Gilmar",
-            "Humberto", "Irene", "Jorge", "Kleber", "Luciana", "Marcelo", "Nadir", "Otacílio", "Paula", "Renata"
+            "Alice", "Brenda", "Caetano", "Danilo", "Enzo", "Fabiana", "Gilberto", "Henrique", "Isadora", "Jose",
+            "Katia", "Lorena", "Mauricio", "Natanael", "Osvaldo", "Pamela", "Regina", "Sandro", "Tania", "Ulisses",
+            "Vania", "Wilson", "Yago", "Zelia", "Amelia", "Bernardo", "Celso", "Dulce", "Edson", "Fatima", "Gilmar",
+            "Humberto", "Irene", "Jorge", "Kleber", "Luciana", "Marcelo", "Nadir", "Otacilio", "Paula", "Renata"
     };
-    
+
     private static final String[] SOBRENOMES = {
             "Almeida", "Barbosa", "Campos", "Dias", "Evangelista", "Ferreira", "Gomes", "Henrique", "Iglesias",
             "Junqueira",
             "Klein", "Lima", "Medeiros", "Nascimento", "Oliveira", "Pereira", "Queiroz", "Rodrigues", "Silva",
             "Teixeira",
-            "Uchoa", "Vasconcelos", "Watanabe", "Ximenes", "Yamamoto", "Zanetti", "Araújo", "Borges", "Coelho",
+            "Uchoa", "Vasconcelos", "Watanabe", "Ximenes", "Yamamoto", "Zanetti", "Araujo", "Borges", "Coelho",
             "Dantas",
-            "Esteves", "Farias", "Guimarães", "Holanda", "Ivo", "Jardim", "Krieger", "Lacerda", "Monteiro", "Neves",
+            "Esteves", "Farias", "Guimaraes", "Holanda", "Ivo", "Jardim", "Krieger", "Lacerda", "Monteiro", "Neves",
             "Oliveira", "Porto", "Quintana", "Ramos", "Sanches", "Torrico", "Urbano", "Vieira", "Wanderley", "Xavier",
-            "Yunes", "Zampieri", "Abreu", "Barreto", "Coutinho", "Delgado", "Elias", "França", "Godoy", "Haddad",
+            "Yunes", "Zampieri", "Abreu", "Barreto", "Coutinho", "Delgado", "Elias", "Franca", "Godoy", "Haddad",
             "Ibrahim", "Jacob", "Lopes", "Moura", "Nogueira", "Ortega", "Pinto", "Quaresma", "Reis", "Souto",
             "Torres", "Ubaldo", "Valente", "Weber", "Ximenes", "Yamaguchi", "Zanella", "Alvarenga", "Bittencourt",
             "Carvalho",
-            "Duarte", "Espíndola", "Freitas", "Gonçalves", "Herrera", "Ishikawa", "Junqueira", "Lacerda", "Mancini",
+            "Duarte", "Espindola", "Freitas", "Goncalves", "Herrera", "Ishikawa", "Junqueira", "Lacerda", "Mancini",
             "Noronha",
             "Orsini", "Paz", "Quevedo", "Rangel", "Souza", "Tavares", "Uchoa", "Vilela", "Werneck", "Xisto"
     };
 
-    private GeradorArquivosOrdenados() {
+    private GeradorArquivos() {
     }
 
     public static void main(String[] args) {
