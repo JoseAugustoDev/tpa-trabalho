@@ -11,7 +11,7 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.colecoes.dominio.Contato;
-import org.colecoes.dominio.comparator.ContatoPorNome;
+import org.colecoes.dominio.comparator.ContatoPorTelefone;
 import org.colecoes.src.colecao.IColecao;
 import org.colecoes.src.listaencadeada.ListaEncadeada;
 
@@ -24,7 +24,7 @@ public class Main {
 
         Boolean ordenada = "S".equalsIgnoreCase(scanner.nextLine().trim());
 
-        IColecao<Contato> lista = new ListaEncadeada<>(new ContatoPorNome(), ordenada);
+        IColecao<Contato> lista = new ListaEncadeada<>(new ContatoPorTelefone(), ordenada);
 
         String opcao;
         do {
@@ -71,7 +71,7 @@ public class Main {
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
         IColecao<Contato> novaLista = new ListaEncadeada<>(
-                new ContatoPorNome(), ordenada);
+                new ContatoPorTelefone(), ordenada);
         Set<String> telefonesCadastrados = new HashSet<>();
 
         // Implementado com IA
@@ -137,13 +137,14 @@ public class Main {
         System.out.println("Digite o telefone do contato:");
         String telefone = scanner.nextLine().trim();
 
-        if (buscarContatoPorTelefone(lista, telefone) != null) {
+        Contato contato = new Contato(nome, telefone);
+
+        if (lista.pesquisar(contato) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
 
-        Contato novoContato = new Contato(nome, telefone);
-        lista.adicionar(novoContato);
+        lista.adicionar(contato);
         System.out.println("Contato adicionado com sucesso.");
     }
 
@@ -151,8 +152,10 @@ public class Main {
         System.out.println("Digite o nome do contato a ser pesquisado:");
         String nome = scanner.nextLine().trim();
 
+        Contato chavePesquisa = new Contato(nome, "");
+
         long inicio = System.nanoTime();
-        Contato contatoPesquisado = buscarContatoPorNome(lista, nome);
+        Contato contatoPesquisado = lista.pesquisar(chavePesquisa);
         long tempo = System.nanoTime() - inicio;
 
         if (contatoPesquisado != null) {
@@ -167,10 +170,15 @@ public class Main {
     private static void pesquisarContatoPorTelefone(IColecao<Contato> lista) {
         System.out.println("Digite o telefone do contato a ser pesquisado:");
         String telefone = scanner.nextLine().trim();
+
         Contato chavePesquisa = new Contato("", telefone);
 
+        ContatoPorTelefone comparadorPesquisa = new ContatoPorTelefone();
+        ListaEncadeada<Contato> listaEncadeada = obterListaEncadeada(lista);
+
         long inicio = System.nanoTime();
-        Contato contatoPesquisado = lista.pesquisar(chavePesquisa);
+        Contato contatoPesquisado = listaEncadeada.pesquisar(
+                chavePesquisa, comparadorPesquisa);
         long tempo = System.nanoTime() - inicio;
 
         if (contatoPesquisado != null) {
@@ -185,10 +193,12 @@ public class Main {
     private static void removerContato(IColecao<Contato> lista) {
         System.out.println("Digite o telefone do contato a ser removido:");
         String telefone = scanner.nextLine().trim();
-        Contato chaveRemocao = new Contato("", telefone);
+
+        Contato contato = new Contato("", telefone);
 
         long inicio = System.nanoTime();
-        boolean removido = lista.remover(chaveRemocao);
+        boolean removido = lista.remover(contato);
+
         long tempo = System.nanoTime() - inicio;
 
         if (removido) {
@@ -210,7 +220,9 @@ public class Main {
     private static void alterarContato(IColecao<Contato> lista) {
         System.out.println("Digite o nome do contato a ser alterado:");
         String nome = scanner.nextLine().trim();
-        Contato contatoAlteracao = buscarContatoPorNome(lista, nome);
+
+        Contato chavePesquisa = new Contato(nome, "");
+        Contato contatoAlteracao = lista.pesquisar(chavePesquisa);
 
         if (contatoAlteracao == null) {
             System.out.println("Contato não encontrado para alteração.");
@@ -225,7 +237,7 @@ public class Main {
         String novoTelefone = scanner.nextLine().trim();
 
         if (!novoTelefone.equalsIgnoreCase(contatoAlteracao.getTelefone())
-                && buscarContatoPorTelefone(lista, novoTelefone) != null) {
+                && lista.pesquisar(new Contato("", novoTelefone)) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
@@ -240,17 +252,11 @@ public class Main {
         System.out.println("Contato atualizado: " + contatoAtualizado);
     }
 
-    private static Contato buscarContatoPorTelefone(IColecao<Contato> lista, String telefone) {
-        return lista.pesquisar(new Contato("", telefone));
-    }
-
-    private static Contato buscarContatoPorNome(IColecao<Contato> lista, String nome) {
-        for (Contato contato : contatosDaLista(lista)) {
-            if (contato.getNome().equalsIgnoreCase(nome)) {
-                return contato;
-            }
+    private static ListaEncadeada<Contato> obterListaEncadeada(IColecao<Contato> lista) {
+        if (lista instanceof ListaEncadeada<?>) {
+            return (ListaEncadeada<Contato>) lista;
         }
-        return null;
+        throw new IllegalArgumentException("A coleção informada não é uma lista encadeada.");
     }
 
     @SuppressWarnings("unchecked")

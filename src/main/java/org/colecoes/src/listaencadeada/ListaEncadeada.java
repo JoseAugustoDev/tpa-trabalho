@@ -69,12 +69,22 @@ public class ListaEncadeada<T> implements IColecao<T>, Iterable<T> {
 
     @Override
     public T pesquisar(T valor) {
-        if (valor == null) return null;
+        return pesquisar(valor, comparador, ehOrdenada);
+    }
+
+    public T pesquisar(T valor, Comparator<T> comparadorPesquisa) {
+        return pesquisar(valor, comparadorPesquisa, false);
+    }
+
+    private T pesquisar(
+            T valor, Comparator<T> comparadorPesquisa, boolean encerrarAoUltrapassar) {
+        if (valor == null || comparadorPesquisa == null) return null;
+
         No<T> atual = prim;
         while (atual != null) {
-            int resultado = comparador.compare(atual.getValor(), valor);
+            int resultado = comparadorPesquisa.compare(atual.getValor(), valor);
             if (resultado == 0) return atual.getValor();
-            if (ehOrdenada && resultado > 0) return null;
+            if (encerrarAoUltrapassar && resultado > 0) return null;
             atual = atual.getProx();
         }
         return null;
