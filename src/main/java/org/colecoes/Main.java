@@ -11,43 +11,48 @@ import java.util.Scanner;
 import java.util.Set;
 
 import org.colecoes.dominio.Contato;
+import org.colecoes.dominio.comparator.ContatoPorNome;
 import org.colecoes.dominio.comparator.ContatoPorTelefone;
+import org.colecoes.dominio.comparator.ContatoSomentePorNome;
 import org.colecoes.src.colecao.IColecao;
 import org.colecoes.src.listaencadeada.ListaEncadeada;
 
 public class Main {
 
     static Scanner scanner = new Scanner(System.in);
+    static IColecao<Contato> listaPorNome;
+    static IColecao<Contato> listaPorTelefone;
 
     public static void main(String[] args) {
         System.out.println("Instanciar lista ordenada? (S/N)");
 
         Boolean ordenada = "S".equalsIgnoreCase(scanner.nextLine().trim());
 
-        IColecao<Contato> lista = new ListaEncadeada<>(new ContatoPorTelefone(), ordenada);
+        listaPorNome = new ListaEncadeada<>(new ContatoPorNome(), ordenada);
+        listaPorTelefone = new ListaEncadeada<>(new ContatoPorTelefone(), ordenada);
 
         String opcao;
         do {
             exibirMenu();
             opcao = scanner.nextLine().trim();
             switch (opcao) {
-                case "1" -> lista = carregarDadosIniciais(lista, ordenada);
-                case "2" -> adicionarContato(lista);
-                case "3" -> pesquisarContatoPorNome(lista);
-                case "4" -> pesquisarContatoPorTelefone(lista);
-                case "5" -> removerContato(lista);
-                case "6" -> listarContatos(lista);
-                case "7" -> alterarContato(lista);
+                case "1" -> carregarDadosIniciais(ordenada);
+                case "2" -> adicionarContato();
+                case "3" -> pesquisarContatoPorNome();
+                case "4" -> pesquisarContatoPorTelefone();
+                case "5" -> removerContato();
+                case "6" -> listarContatos();
+                case "7" -> alterarContato();
                 case "0" -> {
-                    System.out.println("Quantidade atual de contatos: " + lista.quantidadeNos());
+                    System.out.println("Quantidade atual de contatos: "
+                            + listaPorNome.quantidadeNos());
                 }
                 default -> System.out.println("Opção inválida. Tente novamente.");
             }
         } while (!opcao.equals("0"));
     }
 
-    private static IColecao<Contato> carregarDadosIniciais(
-            IColecao<Contato> listaAtual, boolean ordenada) {
+    private static void carregarDadosIniciais(boolean ordenada) {
         System.out.println("Escolha um arquivo para carregar os dados iniciais:");
         System.out.println("1 - contatos-100000.txt");
         System.out.println("2 - contatos-200000.txt");
@@ -65,12 +70,14 @@ public class Main {
 
         if (nomeArquivo == null) {
             System.out.println("Opção inválida.");
-            return listaAtual;
+            return;
         }
 
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
-        IColecao<Contato> novaLista = new ListaEncadeada<>(
+        IColecao<Contato> novaListaPorNome = new ListaEncadeada<>(
+                new ContatoPorNome(), ordenada);
+        IColecao<Contato> novaListaPorTelefone = new ListaEncadeada<>(
                 new ContatoPorTelefone(), ordenada);
         Set<String> telefonesCadastrados = new HashSet<>();
 
@@ -105,7 +112,9 @@ public class Main {
                             "Telefone duplicado na linha " + numeroLinha + ": " + telefone + ".");
                 }
 
-                novaLista.adicionar(new Contato(nome, telefone));
+                Contato contato = new Contato(nome, telefone);
+                novaListaPorNome.adicionar(contato);
+                novaListaPorTelefone.adicionar(contato);
                 quantidadeLida++;
             }
 
@@ -119,7 +128,8 @@ public class Main {
             System.out.println(quantidadeLida + " contatos carregados com sucesso.");
             System.out.printf("Tempo de leitura e montagem da lista: %d ns (%.3f ms)%n",
                     tempo, tempo / 1_000_000.0);
-            return novaLista;
+            listaPorNome = novaListaPorNome;
+            listaPorTelefone = novaListaPorTelefone;
         } catch (NoSuchFileException e) {
             System.out.println("Arquivo não encontrado: " + nomeArquivo);
         } catch (NumberFormatException e) {
@@ -127,10 +137,9 @@ public class Main {
         } catch (IOException e) {
             System.out.println("Erro ao carregar o arquivo: " + e.getMessage());
         }
-        return listaAtual;
     }
 
-    private static void adicionarContato(IColecao<Contato> lista) {
+    private static void adicionarContato() {
         System.out.println("Digite o nome do contato:");
         String nome = scanner.nextLine().trim();
 
@@ -139,23 +148,22 @@ public class Main {
 
         Contato contato = new Contato(nome, telefone);
 
-        if (lista.pesquisar(contato) != null) {
+        if (listaPorTelefone.pesquisar(contato) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
 
-        lista.adicionar(contato);
+        listaPorNome.adicionar(contato);
+        listaPorTelefone.adicionar(contato);
         System.out.println("Contato adicionado com sucesso.");
     }
 
-    private static void pesquisarContatoPorNome(IColecao<Contato> lista) {
+    private static void pesquisarContatoPorNome() {
         System.out.println("Digite o nome do contato a ser pesquisado:");
         String nome = scanner.nextLine().trim();
 
-        Contato chavePesquisa = new Contato(nome, "");
-
         long inicio = System.nanoTime();
-        Contato contatoPesquisado = lista.pesquisar(chavePesquisa);
+        Contato contatoPesquisado = buscarContatoPorNome(nome);
         long tempo = System.nanoTime() - inicio;
 
         if (contatoPesquisado != null) {
@@ -167,18 +175,14 @@ public class Main {
                 tempo, tempo / 1_000_000.0);
     }
 
-    private static void pesquisarContatoPorTelefone(IColecao<Contato> lista) {
+    private static void pesquisarContatoPorTelefone() {
         System.out.println("Digite o telefone do contato a ser pesquisado:");
         String telefone = scanner.nextLine().trim();
 
         Contato chavePesquisa = new Contato("", telefone);
 
-        ContatoPorTelefone comparadorPesquisa = new ContatoPorTelefone();
-        ListaEncadeada<Contato> listaEncadeada = obterListaEncadeada(lista);
-
         long inicio = System.nanoTime();
-        Contato contatoPesquisado = listaEncadeada.pesquisar(
-                chavePesquisa, comparadorPesquisa);
+        Contato contatoPesquisado = listaPorTelefone.pesquisar(chavePesquisa);
         long tempo = System.nanoTime() - inicio;
 
         if (contatoPesquisado != null) {
@@ -190,16 +194,23 @@ public class Main {
                 tempo, tempo / 1_000_000.0);
     }
 
-    private static void removerContato(IColecao<Contato> lista) {
+    private static void removerContato() {
         System.out.println("Digite o telefone do contato a ser removido:");
         String telefone = scanner.nextLine().trim();
 
-        Contato contato = new Contato("", telefone);
+        Contato chavePesquisa = new Contato("", telefone);
+        Contato contato = listaPorTelefone.pesquisar(chavePesquisa);
 
         long inicio = System.nanoTime();
-        boolean removido = lista.remover(contato);
-
+        boolean removidoPorTelefone = listaPorTelefone.remover(chavePesquisa);
+        boolean removidoPorNome = !removidoPorTelefone
+                || listaPorNome.remover(contato);
+        if (removidoPorTelefone && !removidoPorNome) {
+            listaPorTelefone.adicionar(contato);
+        }
         long tempo = System.nanoTime() - inicio;
+
+        boolean removido = removidoPorTelefone && removidoPorNome;
 
         if (removido) {
             System.out.println("Contato removido com sucesso.");
@@ -210,19 +221,18 @@ public class Main {
                 tempo, tempo / 1_000_000.0);
     }
 
-    private static void listarContatos(IColecao<Contato> lista) {
+    private static void listarContatos() {
         System.out.println("Lista de contatos:");
-        for (Contato contato : contatosDaLista(lista)) {
+        for (Contato contato : contatosDaLista(listaPorNome)) {
             System.out.println(contato);
         }
     }
 
-    private static void alterarContato(IColecao<Contato> lista) {
+    private static void alterarContato() {
         System.out.println("Digite o nome do contato a ser alterado:");
         String nome = scanner.nextLine().trim();
 
-        Contato chavePesquisa = new Contato(nome, "");
-        Contato contatoAlteracao = lista.pesquisar(chavePesquisa);
+        Contato contatoAlteracao = buscarContatoPorNome(nome);
 
         if (contatoAlteracao == null) {
             System.out.println("Contato não encontrado para alteração.");
@@ -237,21 +247,34 @@ public class Main {
         String novoTelefone = scanner.nextLine().trim();
 
         if (!novoTelefone.equalsIgnoreCase(contatoAlteracao.getTelefone())
-                && lista.pesquisar(new Contato("", novoTelefone)) != null) {
+                && listaPorTelefone.pesquisar(new Contato("", novoTelefone)) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
 
         Contato contatoAtualizado = new Contato(novoNome, novoTelefone);
-        if (!lista.remover(contatoAlteracao)) {
+        boolean removidoPorNome = listaPorNome.remover(contatoAlteracao);
+        boolean removidoPorTelefone = listaPorTelefone.remover(contatoAlteracao);
+        if (!removidoPorNome || !removidoPorTelefone) {
+            if (removidoPorNome) listaPorNome.adicionar(contatoAlteracao);
+            if (removidoPorTelefone) listaPorTelefone.adicionar(contatoAlteracao);
             System.out.println("Não foi possível alterar o contato.");
             return;
         }
-        lista.adicionar(contatoAtualizado);
+        listaPorNome.adicionar(contatoAtualizado);
+        listaPorTelefone.adicionar(contatoAtualizado);
 
         System.out.println("Contato atualizado: " + contatoAtualizado);
     }
 
+    private static Contato buscarContatoPorNome(String nome) {
+        Contato chavePesquisa = new Contato(nome, "");
+        ListaEncadeada<Contato> listaEncadeada = obterListaEncadeada(listaPorNome);
+        return listaEncadeada.pesquisar(
+                chavePesquisa, new ContatoSomentePorNome());
+    }
+
+    @SuppressWarnings("unchecked")
     private static ListaEncadeada<Contato> obterListaEncadeada(IColecao<Contato> lista) {
         if (lista instanceof ListaEncadeada<?>) {
             return (ListaEncadeada<Contato>) lista;
