@@ -58,6 +58,10 @@ public class Main {
         System.out.println("2 - contatos-200000.txt");
         System.out.println("3 - contatos-300000.txt");
         System.out.println("4 - contatos-400000.txt");
+        System.out.println("5 - contatos-10000.txt");
+        System.out.println("6 - contatos-20000.txt");
+        System.out.println("7 - contatos-30000.txt");
+        System.out.println("8 - contatos-40000.txt");
 
         String opcao = scanner.nextLine().trim();
         String nomeArquivo = switch (opcao) {
@@ -65,6 +69,10 @@ public class Main {
             case "2" -> "src/main/java/org/colecoes/dominio/dados/contatos-200000.txt";
             case "3" -> "src/main/java/org/colecoes/dominio/dados/contatos-300000.txt";
             case "4" -> "src/main/java/org/colecoes/dominio/dados/contatos-400000.txt";
+            case "5" -> "src/main/java/org/colecoes/dominio/dados/contatos-10000.txt";
+            case "6" -> "src/main/java/org/colecoes/dominio/dados/contatos-20000.txt";
+            case "7" -> "src/main/java/org/colecoes/dominio/dados/contatos-30000.txt";
+            case "8" -> "src/main/java/org/colecoes/dominio/dados/contatos-40000.txt";
             default -> null;
         };
 
