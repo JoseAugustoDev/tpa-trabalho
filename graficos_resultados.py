@@ -1,78 +1,102 @@
-"""Gera gráficos comparativos dos experimentos realizados."""
-
-from pathlib import Path
-
 import matplotlib.pyplot as plt
-from matplotlib.ticker import FuncFormatter
 
+# ---------------------------------------------------------------------------
+# Dados extraídos das tabelas (todos os tempos já convertidos para ms)
+# ---------------------------------------------------------------------------
 
-TAMANHOS = [100_000, 200_000, 300_000, 400_000]
+tamanhos = [100000, 200000, 300000, 400000]
 
-RESULTADOS = {
-    "Leitura e montagem da lista": {
-        "Ordenada": [92_404.833, 687_298.685, 2_161_261.862, 4_250_734.401],
-        "Não ordenada": [28_259.900, 107_475.418, 231_528.180, 566_921.378],
+dados = {
+    "PC1 (Jose)": {
+        "Leitura e Montagem da Lista": {
+            "ordenada": [92404.833, 687298.685, 2161261.862, 4250734.401],
+            "nao_ordenada": [28259.900, 107475.418, 231528.180, 566921.378],
+        },
+        "Pesquisar pelo telefone (último)": {
+            "ordenada": [17.369, 19.768, 31.426, 41.572],
+            "nao_ordenada": [8.151, 10.144, 14.682, 14.908],
+        },
+        "Pesquisar pelo nome (último)": {
+            "ordenada": [14.199, 11.509, 20.213, 35.024],
+            "nao_ordenada": [1.333, 1.039, 2.234, 1.679],
+        },
+        "Remover pelo telefone (último)": {
+            "ordenada": [18.711, 39.200, 58.070, 64.008],
+            "nao_ordenada": [10.272, 10.475, 21.512, 40.000],
+        },
     },
-    "Pesquisa pelo telefone": {
-        "Ordenada": [17.369, 19.768, 31.426, 41.572],
-        "Não ordenada": [8.151, 10.144, 14.682, 14.908],
-    },
-    "Pesquisa pelo nome": {
-        "Ordenada": [14.199, 11.509, 20.213, 35.024],
-        "Não ordenada": [1.333, 1.039, 2.234, 1.679],
-    },
-    "Remoção pelo telefone": {
-        "Ordenada": [18.711, 39.200, 58.070, 64.008],
-        "Não ordenada": [10.272, 10.475, 21.512, 40.000],
+    "PC2 (Leticia)": {
+        "Leitura e Montagem da Lista": {
+            "ordenada": [77381.263, 677503.294, 2460263.607, 5198727.219],
+            "nao_ordenada": [21842.618, 96849.378, 396520.695, 861217.557],
+        },
+        "Pesquisar pelo telefone (último)": {
+            "ordenada": [13.143, 17.312, 35.877, 53.550],
+            "nao_ordenada": [10.109, 15.792, 16.077, 18.855],
+        },
+        "Pesquisar pelo nome (último)": {
+            "ordenada": [5.471, 8.593, 40.366, 44.286],
+            "nao_ordenada": [2.467, 1.574, 3.484, 3.158],
+        },
+        "Remover pelo telefone (último)": {
+            "ordenada": [14.138, 23.549, 79.345, 72.439],
+            "nao_ordenada": [8.577, 15.992, 12.564, 22.330],
+        },
     },
 }
 
+operacoes = list(dados["PC1 (Jose)"].keys())
 
-def formatar_inteiro_br(valor, _posicao):
-    """Formata os valores do eixo usando ponto como separador de milhar."""
-    return f"{valor:,.0f}".replace(",", ".")
+# ---------------------------------------------------------------------------
+# Gera um gráfico por operação, com um subplot para cada PC
+# (ordenada x não-ordenada em função do tamanho da lista)
+# ---------------------------------------------------------------------------
 
+for operacao in operacoes:
+    fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+    fig.suptitle(f"{operacao} — Ordenada x Não-ordenada", fontsize=13)
 
-def criar_graficos():
-    figura, eixos = plt.subplots(2, 2, figsize=(13, 9), sharex=True)
-    eixos = eixos.flatten()
+    for ax, pc in zip(axs, dados.keys()):
+        valores = dados[pc][operacao]
+        ax.plot(tamanhos, valores["ordenada"], marker="o", label="Lista ordenada")
+        ax.plot(tamanhos, valores["nao_ordenada"], marker="o", label="Lista não ordenada")
+        ax.set_title(pc)
+        ax.set_xlabel("Quantidade de contatos")
+        ax.set_ylabel("Tempo (ms)")
+        ax.set_xticks(tamanhos)
+        ax.grid(True, linestyle="--", alpha=0.5)
+        ax.legend()
 
-    estilos = {
-        "Ordenada": {"color": "#d62728", "marker": "o"},
-        "Não ordenada": {"color": "#1f77b4", "marker": "s"},
-    }
+    fig.tight_layout(rect=[0, 0, 1, 0.94])
+    nome_arquivo = "grafico_" + operacao.lower()
+    for ch, sub in [(" ", "_"), ("(", ""), (")", ""), ("á", "a"), ("ó", "o"),
+                    ("ú", "u"), ("é", "e"), ("ê", "e"), ("ã", "a"), ("ç", "c")]:
+        nome_arquivo = nome_arquivo.replace(ch, sub)
+    fig.savefig(f"{nome_arquivo}.png", dpi=150)
+    plt.close(fig)
 
-    for eixo, (operacao, series) in zip(eixos, RESULTADOS.items()):
-        for tipo_lista, tempos in series.items():
-            eixo.plot(
-                TAMANHOS,
-                tempos,
-                linewidth=2,
-                markersize=6,
-                label=tipo_lista,
-                **estilos[tipo_lista],
-            )
+# ---------------------------------------------------------------------------
+# Gráfico extra: Leitura e Montagem da Lista em escala logarítmica
+# (os tempos crescem muito e "escondem" as diferenças em escala linear)
+# ---------------------------------------------------------------------------
 
-        eixo.set_title(operacao)
-        eixo.set_xlabel("Quantidade de contatos")
-        eixo.set_ylabel("Tempo (ms)")
-        eixo.set_xticks(TAMANHOS)
-        eixo.xaxis.set_major_formatter(FuncFormatter(formatar_inteiro_br))
-        eixo.yaxis.set_major_formatter(FuncFormatter(formatar_inteiro_br))
-        eixo.grid(True, linestyle="--", alpha=0.35)
-        eixo.legend()
+fig, axs = plt.subplots(1, 2, figsize=(12, 5))
+fig.suptitle("Leitura e Montagem da Lista — Escala Logarítmica", fontsize=13)
 
-    figura.suptitle(
-        "Desempenho da Lista Encadeada",
-        fontsize=16,
-    )
-    figura.tight_layout(rect=(0, 0, 1, 0.96))
+for ax, pc in zip(axs, dados.keys()):
+    valores = dados[pc]["Leitura e Montagem da Lista"]
+    ax.plot(tamanhos, valores["ordenada"], marker="o", label="Lista ordenada")
+    ax.plot(tamanhos, valores["nao_ordenada"], marker="o", label="Lista não ordenada")
+    ax.set_title(pc)
+    ax.set_xlabel("Quantidade de contatos")
+    ax.set_ylabel("Tempo (ms) — escala log")
+    ax.set_yscale("log")
+    ax.set_xticks(tamanhos)
+    ax.grid(True, which="both", linestyle="--", alpha=0.5)
+    ax.legend()
 
-    arquivo_saida = Path(__file__).with_name("graficos_resultados_pc1.png")
-    figura.savefig(arquivo_saida, dpi=300, bbox_inches="tight")
-    print(f"Gráfico salvo em: {arquivo_saida.resolve()}")
-    plt.show()
+fig.tight_layout(rect=[0, 0, 1, 0.94])
+fig.savefig("grafico_leitura_montagem_log.png", dpi=150)
+plt.close(fig)
 
-
-if __name__ == "__main__":
-    criar_graficos()
+print("Gráficos gerados com sucesso na pasta atual.")
