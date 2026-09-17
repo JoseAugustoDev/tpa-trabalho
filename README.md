@@ -22,6 +22,9 @@ Pacotes {
 
 ## Formato dos arquivos
 
+O programa carrega os dados exclusivamente do arquivo `entrada.txt`, localizado na raiz do projeto. Os demais arquivos desse diretório
+podem ser usados como base para criar esse arquivo de entrada.
+
 A primeira linha informa a quantidade de contatos e as demais seguem o formato `nome;telefone`:
 
 ```text
@@ -44,3 +47,5 @@ Depois, inicie a aplicação:
 ```bash
 java -cp target/classes org.colecoes.Main
 ```
+
+Antes de selecionar a opção de carregamento no menu, coloque o arquivo desejado na raíz do projeto com o nome `entrada.txt`.

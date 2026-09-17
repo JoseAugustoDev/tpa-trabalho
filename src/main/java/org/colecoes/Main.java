@@ -19,6 +19,7 @@ import org.colecoes.src.listaencadeada.ListaEncadeada;
 
 public class Main {
 
+    private static final Path ARQUIVO_ENTRADA = Path.of("entrada.txt");
     static Scanner scanner = new Scanner(System.in);
     static IColecao<Contato> listaPorNome;
     static IColecao<Contato> listaPorTelefone;
@@ -53,33 +54,7 @@ public class Main {
     }
 
     private static void carregarDadosIniciais(boolean ordenada) {
-        System.out.println("Escolha um arquivo para carregar os dados iniciais:");
-        System.out.println("1 - contatos-100000.txt");
-        System.out.println("2 - contatos-200000.txt");
-        System.out.println("3 - contatos-300000.txt");
-        System.out.println("4 - contatos-400000.txt");
-        System.out.println("5 - contatos-10000.txt");
-        System.out.println("6 - contatos-20000.txt");
-        System.out.println("7 - contatos-30000.txt");
-        System.out.println("8 - contatos-40000.txt");
-
-        String opcao = scanner.nextLine().trim();
-        String nomeArquivo = switch (opcao) {
-            case "1" -> "src/main/java/org/colecoes/dominio/dados/contatos-100000.txt";
-            case "2" -> "src/main/java/org/colecoes/dominio/dados/contatos-200000.txt";
-            case "3" -> "src/main/java/org/colecoes/dominio/dados/contatos-300000.txt";
-            case "4" -> "src/main/java/org/colecoes/dominio/dados/contatos-400000.txt";
-            case "5" -> "src/main/java/org/colecoes/dominio/dados/contatos-10000.txt";
-            case "6" -> "src/main/java/org/colecoes/dominio/dados/contatos-20000.txt";
-            case "7" -> "src/main/java/org/colecoes/dominio/dados/contatos-30000.txt";
-            case "8" -> "src/main/java/org/colecoes/dominio/dados/contatos-40000.txt";
-            default -> null;
-        };
-
-        if (nomeArquivo == null) {
-            System.out.println("Opção inválida.");
-            return;
-        }
+        System.out.println("Carregando dados do arquivo " + ARQUIVO_ENTRADA + "...");
 
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
@@ -91,7 +66,7 @@ public class Main {
 
         // Implementado com IA
         try (BufferedReader leitor = Files.newBufferedReader(
-                Path.of(nomeArquivo), StandardCharsets.UTF_8)) {
+                ARQUIVO_ENTRADA, StandardCharsets.UTF_8)) {
 
             String cabecalho = leitor.readLine();
             if (cabecalho == null) {
@@ -139,9 +114,10 @@ public class Main {
             listaPorNome = novaListaPorNome;
             listaPorTelefone = novaListaPorTelefone;
         } catch (NoSuchFileException e) {
-            System.out.println("Arquivo não encontrado: " + nomeArquivo);
+            System.out.println("Arquivo de entrada não encontrado: "
+                    + ARQUIVO_ENTRADA.toAbsolutePath());
         } catch (NumberFormatException e) {
-            System.out.println("Cabeçalho inválido no arquivo " + nomeArquivo + ".");
+            System.out.println("Cabeçalho inválido no arquivo " + ARQUIVO_ENTRADA + ".");
         } catch (IOException e) {
             System.out.println("Erro ao carregar o arquivo: " + e.getMessage());
         }
