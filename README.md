@@ -1,4 +1,4 @@
-# Trabalho 1 de TPA — Lista Encadeada Genérica
+# Trabalho 2 de TPA — Lista e Arvore
 
 Alunos: Jose Augusto e Letícia Comissário.
 
@@ -11,14 +11,18 @@ Alunos: Jose Augusto e Letícia Comissário.
 
 ## Organização do código
 
-Pacotes {
-  dominio: Contem a entidade contato; 
-  dominio/comparator: realiza as comparações de elementos por nome e/ou telefone;
-  dominio/dados: contem os arquivos txt de entrada, com diversos tamanhos.;
-  src/arquivo: Classes LeitorArquivos e GeradorArquivos, utilizadas para gerar os dados de contatos de forma randomizada e permitir ler e extrair o conteudo do txt;
-  src/colecao: Interface fornecida pelo professor, na qual tivemos que seguir;
-  src/listaencadeada: Encontra-se a implementação da ListaEncadeada e do Nó. 
-}
+- `dominio`: entidade `Contato`;
+- `dominio/comparator`: critérios de comparação por nome e por telefone;
+- `dominio/dados`: arquivos de entrada com diversos tamanhos;
+- `src/arquivo`: leitura e geração de arquivos de contatos;
+- `src/colecao`: interface `IColecao` fornecida pelo professor;
+- `src/listaencadeada`: implementação da lista encadeada genérica;
+- `src/arvorebinaria`: classe base fornecida e implementação da árvore binária
+  de busca genérica.
+
+A árvore recebe um `Comparator<T>` no construtor. Assim, o aplicativo mantém
+duas árvores do mesmo tipo `Contato`: uma indexada por nome e outra por
+telefone.
 
 ## Formato dos arquivos
 
@@ -32,6 +36,18 @@ A primeira linha informa a quantidade de contatos e as demais seguem o formato `
 Ana Almeida;(99) 90000-0001
 Bruno Lima;(99) 90000-0002
 Carla Souza;(99) 90000-0003
+```
+
+## Geradores para os testes da árvore
+
+Os geradores criam, por padrão, arquivos com 100.000, 200.000, 300.000 e
+400.000 contatos no diretório `dominio/dados/arvore-contatos`.
+
+- `GeradorArquivosOrdenados`: grava os telefones em ordem crescente. A
+  inserção em uma árvore indexada por telefone produz uma árvore degenerada;
+- `GeradorArquivosBalanceados`: grava primeiro o elemento central do intervalo
+  e repete o processo nas metades esquerda e direita. A inserção produz uma
+  árvore de altura mínima.
 ```
 
 ## Como compilar e executar
@@ -48,4 +64,5 @@ Depois, inicie a aplicação:
 java -cp target/classes org.colecoes.Main
 ```
 
+Ao iniciar, escolha entre lista não ordenada, lista ordenada ou árvore binária.
 Antes de selecionar a opção de carregamento no menu, coloque o arquivo desejado na raíz do projeto com o nome `entrada.txt`.
