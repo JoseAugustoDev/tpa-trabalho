@@ -80,6 +80,17 @@ public final class GeradorArquivos {
     }
 
     private static List<Contato> gerarContatos(int quantidade, Random random) {
+        List<Contato> contatos = gerarContatosEmOrdemCrescente(quantidade, random);
+        Collections.shuffle(contatos, random);
+        return contatos;
+    }
+
+    static List<Contato> gerarContatosEmOrdemCrescente(int quantidade, long semente) {
+        return gerarContatosEmOrdemCrescente(quantidade, new Random(semente));
+    }
+
+    private static List<Contato> gerarContatosEmOrdemCrescente(
+            int quantidade, Random random) {
         if (quantidade <= 0 || quantidade > 99_999_999) {
             throw new IllegalArgumentException(
                     "A quantidade deve estar entre 1 e 99999999.");
@@ -92,7 +103,6 @@ public final class GeradorArquivos {
             String telefone = String.format("(99) 9%04d-%04d", i / 10_000, i % 10_000);
             contatos.add(new Contato(nome, telefone));
         }
-        Collections.shuffle(contatos, random);
         return contatos;
     }
 }
