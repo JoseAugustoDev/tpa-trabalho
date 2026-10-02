@@ -65,23 +65,20 @@ public final class LeitorArquivos {
         }
     }
 
-    public static void salvarContatos(Iterable<Contato> contatos) throws IOException {
+    public static void salvarContatos(List<Contato> contatos) throws IOException {
         salvarContatos(ARQUIVO_CONTATOS, contatos);
     }
 
-    public static void salvarContatos(Path arquivo, Iterable<Contato> contatos) throws IOException {
-        List<Contato> listaContatos = new ArrayList<>();
-        contatos.forEach(listaContatos::add);
-
+    public static void salvarContatos(Path arquivo, List<Contato> contatos) throws IOException {
         Path arquivoAbsoluto = arquivo.toAbsolutePath();
         Path diretorio = arquivoAbsoluto.getParent();
         if (diretorio != null) Files.createDirectories(diretorio);
 
         Path temporario = arquivoAbsoluto.resolveSibling(arquivoAbsoluto.getFileName() + ".tmp");
         try (BufferedWriter writer = Files.newBufferedWriter(temporario, StandardCharsets.UTF_8)) {
-            writer.write(Integer.toString(listaContatos.size()));
+            writer.write(Integer.toString(contatos.size()));
             writer.newLine();
-            for (Contato contato : listaContatos) {
+            for (Contato contato : contatos) {
                 writer.write(contato.getNome());
                 writer.write(';');
                 writer.write(contato.getTelefone());

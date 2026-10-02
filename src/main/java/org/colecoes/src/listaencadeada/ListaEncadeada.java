@@ -1,12 +1,10 @@
 package org.colecoes.src.listaencadeada;
 
 import java.util.Comparator;
-import java.util.Iterator;
-import java.util.NoSuchElementException;
 
 import org.colecoes.src.colecao.IColecao;
 
-public class ListaEncadeada<T> implements IColecao<T>, Iterable<T> {
+public class ListaEncadeada<T> implements IColecao<T> {
     private No<T> prim;
     private final Comparator<T> comparador;
     private final boolean ehOrdenada;
@@ -149,24 +147,4 @@ public class ListaEncadeada<T> implements IColecao<T>, Iterable<T> {
         return resultado.append(']').toString();
     }
 
-    // Override do método iterator() para permitir a iteração sobre a lista encadeada
-    @Override
-    public Iterator<T> iterator() {
-        return new Iterator<>() {
-            private No<T> atual = prim;
-
-            @Override
-            public boolean hasNext() {
-                return atual != null;
-            }
-
-            @Override
-            public T next() {
-                if (!hasNext()) throw new NoSuchElementException();
-                T valor = atual.getValor();
-                atual = atual.getProx();
-                return valor;
-            }
-        };
-    }
 }
