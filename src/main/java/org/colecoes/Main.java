@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Scanner;
 import java.util.Set;
@@ -14,6 +15,7 @@ import org.colecoes.dominio.Contato;
 import org.colecoes.dominio.comparator.ContatoPorNome;
 import org.colecoes.dominio.comparator.ContatoPorTelefone;
 import org.colecoes.dominio.comparator.ContatoSomentePorNome;
+import org.colecoes.src.arvorebinaria.ArvoreBinaria;
 import org.colecoes.src.colecao.IColecao;
 import org.colecoes.src.listaencadeada.ListaEncadeada;
 
@@ -21,23 +23,21 @@ public class Main {
 
     private static final Path ARQUIVO_ENTRADA = Path.of("entrada.txt");
     static Scanner scanner = new Scanner(System.in);
-    static IColecao<Contato> listaPorNome;
-    static IColecao<Contato> listaPorTelefone;
+    static IColecao<Contato> colecaoPorNome;
+    static IColecao<Contato> colecaoPorTelefone;
+    static TipoColecao tipoColecao;
 
     public static void main(String[] args) {
-        System.out.println("Instanciar lista ordenada? (S/N)");
-
-        Boolean ordenada = "S".equalsIgnoreCase(scanner.nextLine().trim());
-
-        listaPorNome = new ListaEncadeada<>(new ContatoPorNome(), ordenada);
-        listaPorTelefone = new ListaEncadeada<>(new ContatoPorTelefone(), ordenada);
+        tipoColecao = selecionarTipoColecao();
+        colecaoPorNome = criarColecao(new ContatoPorNome());
+        colecaoPorTelefone = criarColecao(new ContatoPorTelefone());
 
         String opcao;
         do {
             exibirMenu();
             opcao = scanner.nextLine().trim();
             switch (opcao) {
-                case "1" -> carregarDadosIniciais(ordenada);
+                case "1" -> carregarDadosIniciais();
                 case "2" -> adicionarContato();
                 case "3" -> pesquisarContatoPorNome();
                 case "4" -> pesquisarContatoPorTelefone();
@@ -46,22 +46,20 @@ public class Main {
                 case "7" -> alterarContato();
                 case "0" -> {
                     System.out.println("Quantidade atual de contatos: "
-                            + listaPorNome.quantidadeNos());
+                            + colecaoPorNome.quantidadeNos());
                 }
                 default -> System.out.println("Opção inválida. Tente novamente.");
             }
         } while (!opcao.equals("0"));
     }
 
-    private static void carregarDadosIniciais(boolean ordenada) {
+    private static void carregarDadosIniciais() {
         System.out.println("Carregando dados do arquivo " + ARQUIVO_ENTRADA + "...");
 
         long inicio = System.nanoTime();
         int quantidadeLida = 0;
-        IColecao<Contato> novaListaPorNome = new ListaEncadeada<>(
-                new ContatoPorNome(), ordenada);
-        IColecao<Contato> novaListaPorTelefone = new ListaEncadeada<>(
-                new ContatoPorTelefone(), ordenada);
+        IColecao<Contato> novaColecaoPorNome = criarColecao(new ContatoPorNome());
+        IColecao<Contato> novaColecaoPorTelefone = criarColecao(new ContatoPorTelefone());
         Set<String> telefonesCadastrados = new HashSet<>();
 
         // Implementado com IA
@@ -96,8 +94,8 @@ public class Main {
                 }
 
                 Contato contato = new Contato(nome, telefone);
-                novaListaPorNome.adicionar(contato);
-                novaListaPorTelefone.adicionar(contato);
+                novaColecaoPorNome.adicionar(contato);
+                novaColecaoPorTelefone.adicionar(contato);
                 quantidadeLida++;
             }
 
@@ -109,10 +107,10 @@ public class Main {
 
             long tempo = System.nanoTime() - inicio;
             System.out.println(quantidadeLida + " contatos carregados com sucesso.");
-            System.out.printf("Tempo de leitura e montagem da lista: %d ns (%.3f ms)%n",
+            System.out.printf("Tempo de leitura e montagem da coleção: %d ns (%.3f ms)%n",
                     tempo, tempo / 1_000_000.0);
-            listaPorNome = novaListaPorNome;
-            listaPorTelefone = novaListaPorTelefone;
+            colecaoPorNome = novaColecaoPorNome;
+            colecaoPorTelefone = novaColecaoPorTelefone;
         } catch (NoSuchFileException e) {
             System.out.println("Arquivo de entrada não encontrado: "
                     + ARQUIVO_ENTRADA.toAbsolutePath());
@@ -132,13 +130,13 @@ public class Main {
 
         Contato contato = new Contato(nome, telefone);
 
-        if (listaPorTelefone.pesquisar(contato) != null) {
+        if (colecaoPorTelefone.pesquisar(contato) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
 
-        listaPorNome.adicionar(contato);
-        listaPorTelefone.adicionar(contato);
+        colecaoPorNome.adicionar(contato);
+        colecaoPorTelefone.adicionar(contato);
         System.out.println("Contato adicionado com sucesso.");
     }
 
@@ -166,7 +164,7 @@ public class Main {
         Contato chavePesquisa = new Contato("", telefone);
 
         long inicio = System.nanoTime();
-        Contato contatoPesquisado = listaPorTelefone.pesquisar(chavePesquisa);
+        Contato contatoPesquisado = colecaoPorTelefone.pesquisar(chavePesquisa);
         long tempo = System.nanoTime() - inicio;
 
         if (contatoPesquisado != null) {
@@ -183,14 +181,14 @@ public class Main {
         String telefone = scanner.nextLine().trim();
 
         Contato chavePesquisa = new Contato("", telefone);
-        Contato contato = listaPorTelefone.pesquisar(chavePesquisa);
+        Contato contato = colecaoPorTelefone.pesquisar(chavePesquisa);
 
         long inicio = System.nanoTime();
-        boolean removidoPorTelefone = listaPorTelefone.remover(chavePesquisa);
+        boolean removidoPorTelefone = colecaoPorTelefone.remover(chavePesquisa);
         boolean removidoPorNome = !removidoPorTelefone
-                || listaPorNome.remover(contato);
+                || colecaoPorNome.remover(contato);
         if (removidoPorTelefone && !removidoPorNome) {
-            listaPorTelefone.adicionar(contato);
+            colecaoPorTelefone.adicionar(contato);
         }
         long tempo = System.nanoTime() - inicio;
 
@@ -206,10 +204,8 @@ public class Main {
     }
 
     private static void listarContatos() {
-        System.out.println("Lista de contatos:");
-        for (Contato contato : contatosDaLista(listaPorNome)) {
-            System.out.println(contato);
-        }
+        System.out.println("Contatos:");
+        System.out.println(colecaoPorNome);
     }
 
     private static void alterarContato() {
@@ -231,47 +227,75 @@ public class Main {
         String novoTelefone = scanner.nextLine().trim();
 
         if (!novoTelefone.equalsIgnoreCase(contatoAlteracao.getTelefone())
-                && listaPorTelefone.pesquisar(new Contato("", novoTelefone)) != null) {
+                && colecaoPorTelefone.pesquisar(new Contato("", novoTelefone)) != null) {
             System.out.println("Já existe um contato cadastrado com esse telefone.");
             return;
         }
 
         Contato contatoAtualizado = new Contato(novoNome, novoTelefone);
-        boolean removidoPorNome = listaPorNome.remover(contatoAlteracao);
-        boolean removidoPorTelefone = listaPorTelefone.remover(contatoAlteracao);
+        boolean removidoPorNome = colecaoPorNome.remover(contatoAlteracao);
+        boolean removidoPorTelefone = colecaoPorTelefone.remover(contatoAlteracao);
         if (!removidoPorNome || !removidoPorTelefone) {
-            if (removidoPorNome) listaPorNome.adicionar(contatoAlteracao);
-            if (removidoPorTelefone) listaPorTelefone.adicionar(contatoAlteracao);
+            if (removidoPorNome) colecaoPorNome.adicionar(contatoAlteracao);
+            if (removidoPorTelefone) colecaoPorTelefone.adicionar(contatoAlteracao);
             System.out.println("Não foi possível alterar o contato.");
             return;
         }
-        listaPorNome.adicionar(contatoAtualizado);
-        listaPorTelefone.adicionar(contatoAtualizado);
+        colecaoPorNome.adicionar(contatoAtualizado);
+        colecaoPorTelefone.adicionar(contatoAtualizado);
 
         System.out.println("Contato atualizado: " + contatoAtualizado);
     }
 
     private static Contato buscarContatoPorNome(String nome) {
         Contato chavePesquisa = new Contato(nome, "");
-        ListaEncadeada<Contato> listaEncadeada = obterListaEncadeada(listaPorNome);
-        return listaEncadeada.pesquisar(
-                chavePesquisa, new ContatoSomentePorNome());
+        Comparator<Contato> comparadorPorNome = new ContatoSomentePorNome();
+
+        if (colecaoPorNome instanceof ListaEncadeada<?>) {
+            ListaEncadeada<Contato> lista = (ListaEncadeada<Contato>) colecaoPorNome;
+            return lista.pesquisar(chavePesquisa, comparadorPorNome);
+        }
+
+        if (colecaoPorNome instanceof ArvoreBinaria<?>) {
+            ArvoreBinaria<Contato> arvore = (ArvoreBinaria<Contato>) colecaoPorNome;
+            return arvore.pesquisar(chavePesquisa, comparadorPorNome);
+        }
+
+        throw new IllegalArgumentException("Tipo de coleção não suportado.");
     }
 
-    @SuppressWarnings("unchecked")
-    private static ListaEncadeada<Contato> obterListaEncadeada(IColecao<Contato> lista) {
-        if (lista instanceof ListaEncadeada<?>) {
-            return (ListaEncadeada<Contato>) lista;
-        }
-        throw new IllegalArgumentException("A coleção informada não é uma lista encadeada.");
+    private static IColecao<Contato> criarColecao(Comparator<Contato> comparador) {
+        return switch (tipoColecao) {
+            case LISTA_NAO_ORDENADA -> new ListaEncadeada<>(comparador, false);
+            case LISTA_ORDENADA -> new ListaEncadeada<>(comparador, true);
+            case ARVORE_BINARIA -> new ArvoreBinaria<>(comparador);
+        };
     }
 
-    @SuppressWarnings("unchecked")
-    private static Iterable<Contato> contatosDaLista(IColecao<Contato> lista) {
-        if (lista instanceof Iterable<?>) {
-            return (Iterable<Contato>) lista;
+    private static TipoColecao selecionarTipoColecao() {
+        while (true) {
+            System.out.println("Escolha a coleção que deseja utilizar:");
+            System.out.println("1 - Lista não ordenada");
+            System.out.println("2 - Lista ordenada");
+            System.out.println("3 - Árvore binária");
+
+            switch (scanner.nextLine().trim()) {
+                case "1":
+                    return TipoColecao.LISTA_NAO_ORDENADA;
+                case "2":
+                    return TipoColecao.LISTA_ORDENADA;
+                case "3":
+                    return TipoColecao.ARVORE_BINARIA;
+                default:
+                    System.out.println("Opção inválida. Tente novamente.");
+            }
         }
-        throw new IllegalArgumentException("A coleção informada não pode ser percorrida.");
+    }
+
+    private enum TipoColecao {
+        LISTA_NAO_ORDENADA,
+        LISTA_ORDENADA,
+        ARVORE_BINARIA
     }
 
     private static void exibirMenu() {
