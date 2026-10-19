@@ -17,8 +17,8 @@ Alunos: Jose Augusto e Letícia Comissário.
 - `src/arquivo`: leitura e geração de arquivos de contatos;
 - `src/colecao`: interface `IColecao` fornecida pelo professor;
 - `src/listaencadeada`: implementação da lista encadeada genérica;
-- `src/arvorebinaria`: classe base fornecida e implementação da árvore binária
-  de busca genérica.
+- `src/arvorebinaria`: classe base, árvore binária de busca genérica e árvore
+  AVL com balanceamento por rotações.
 
 A árvore recebe um `Comparator<T>` no construtor. Assim, o aplicativo mantém
 duas árvores do mesmo tipo `Contato`: uma indexada por nome e outra por
@@ -64,5 +64,13 @@ Depois, inicie a aplicação:
 java -cp target/classes org.colecoes.Main
 ```
 
-Ao iniciar, escolha entre lista não ordenada, lista ordenada ou árvore binária.
+Ao iniciar, escolha entre lista não ordenada, lista ordenada, árvore binária
+ou árvore AVL.
 Antes de selecionar a opção de carregamento no menu, coloque o arquivo desejado na raíz do projeto com o nome `entrada.txt`.
+
+Para executar automaticamente as medições da AVL com os quatro arquivos de
+telefones ordenados, use:
+
+```bash
+java -cp target/classes org.colecoes.AvaliadorDesempenhoAVL
+```
