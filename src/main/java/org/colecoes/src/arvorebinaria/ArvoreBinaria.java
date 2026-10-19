@@ -4,7 +4,8 @@ import java.util.Comparator;
 import java.util.Objects;
 
 public class ArvoreBinaria<T> extends ArvoreBinariaBase<T> {
-    private No<T> raiz;
+
+    protected No<T> raiz;
 
     public ArvoreBinaria(Comparator<T> comparador) {
         super(Objects.requireNonNull(comparador, "O comparador não pode ser nulo."));
@@ -205,13 +206,15 @@ public class ArvoreBinaria<T> extends ArvoreBinariaBase<T> {
         caminharEmOrdem(noAtual.direita, resultado);
     }
 
-    private static final class No<T> {
-        private T valor;
-        private No<T> esquerda;
-        private No<T> direita;
+    protected static class No<T> {
+        protected T valor;
+        protected No<T> esquerda;
+        protected No<T> direita;
+        protected int altura;
 
-        private No(T valor) {
+        protected No(T valor) {
             this.valor = valor;
+            this.altura = 0;
         }
     }
 }

@@ -15,6 +15,7 @@ import org.colecoes.dominio.Contato;
 import org.colecoes.dominio.comparator.ContatoPorNome;
 import org.colecoes.dominio.comparator.ContatoPorTelefone;
 import org.colecoes.dominio.comparator.ContatoSomentePorNome;
+import org.colecoes.src.arvorebinaria.ArvoreAVL;
 import org.colecoes.src.arvorebinaria.ArvoreBinaria;
 import org.colecoes.src.colecao.IColecao;
 import org.colecoes.src.listaencadeada.ListaEncadeada;
@@ -269,6 +270,7 @@ public class Main {
             case LISTA_NAO_ORDENADA -> new ListaEncadeada<>(comparador, false);
             case LISTA_ORDENADA -> new ListaEncadeada<>(comparador, true);
             case ARVORE_BINARIA -> new ArvoreBinaria<>(comparador);
+            case ARVORE_AVL -> new ArvoreAVL<>(comparador);
         };
     }
 
@@ -279,6 +281,8 @@ public class Main {
             System.out.println("2 - Lista ordenada");
             System.out.println("3 - Árvore binária");
 
+            System.out.println("4 - Árvore AVL");
+
             switch (scanner.nextLine().trim()) {
                 case "1":
                     return TipoColecao.LISTA_NAO_ORDENADA;
@@ -286,6 +290,8 @@ public class Main {
                     return TipoColecao.LISTA_ORDENADA;
                 case "3":
                     return TipoColecao.ARVORE_BINARIA;
+                case "4":
+                    return TipoColecao.ARVORE_AVL;
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
             }
@@ -295,7 +301,8 @@ public class Main {
     private enum TipoColecao {
         LISTA_NAO_ORDENADA,
         LISTA_ORDENADA,
-        ARVORE_BINARIA
+        ARVORE_BINARIA,
+        ARVORE_AVL
     }
 
     private static void exibirMenu() {
